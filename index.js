@@ -29,16 +29,31 @@ async function run() {
         })
 
         //post a product
-        app.post('/product', async(req,res)=>{
+        app.post('/product', async (req, res) => {
             const newProduct = req.body;
             const result = await productsCollection.insertOne(newProduct);
+            res.send(result);
+        })
+
+        //update a product
+        app.put('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const updatedData = req.body;
+            const options = { upsert: true }
+            const updatedDoc = {
+                $set: {
+                    updatedData
+                }
+            };
+            const result = await productsCollection.updateOne(filter, updatedDoc, options)
             res.send(result);
         })
 
         //delete a product
         app.delete('/product/:id', async (req, res) => {
             const id = req.params.id;
-            const result = await productsCollection.deleteOne({_id: ObjectId(id)});
+            const result = await productsCollection.deleteOne({ _id: ObjectId(id) });
             res.send(result);
         })
     } finally {
@@ -46,7 +61,7 @@ async function run() {
     }
 }
 run().catch(console.dir);
-app.get('/',(req,res)=>{
+app.get('/', (req, res) => {
     res.send('SERVER IS RUNNING')
 })
 app.listen(PORT, () => {
